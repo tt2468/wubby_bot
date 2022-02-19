@@ -127,3 +127,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+subscriber_data/subscriber_durations.json
+subscriber_data/*.csv
