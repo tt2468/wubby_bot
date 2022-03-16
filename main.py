@@ -477,6 +477,30 @@ async def inrole(ctx, role: discord.Role):
     await ctx.send('The members of role `{}` have been logged to console. There are `{}` members in the role.'.format(role.name, len(role.members)))
 
 @bot.command()
+@commands.check(is_a_mod)
+async def checkmember6month(ctx, target: discord.Member = None):
+    if not target:
+        await ctx.send('Unable to determine target member.')
+        return
+    await read_six_month_subs()
+    key = await redis.get('wubby_events_{}'.format(target.id))
+    if not key:
+        await ctx.send('Member is not a six month sub. Account not linked to https://events.wubby.tv')
+        return
+    keyData = json.loads(key)
+    twitchUsername = keyData.get('twitchUsername')
+    if not twitchUsername:
+        await ctx.send('Member is not a six month sub. Invalid database format. Relink to https://events.wubby.tv')
+        return
+    if twitchUsername.lower() not in sixMonthSubs:
+        await ctx.send('Member is not a six month sub. Twitch username {} not found in 6 month database.\nTry relinking Twitch to Discord then redoing https://events.wubby.tv'.format(twitchUsername))
+        return
+    if sixMonthSubs[twitchUsername.lower()] >= 6:
+        await ctx.send('Member is a six month sub.')
+    else:
+        await ctx.send('Member is not a six month sub. Twitch username {} has only been subscribed for {} months according to database.'.format(twitchUsername, sixMonthSubs[twitchUsername.lower()]))
+
+@bot.command()
 @is_in_guild(sixMonthDiscordId)
 @commands.has_permissions(administrator=True)
 async def loopsixmonth(ctx):
