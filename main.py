@@ -21,6 +21,7 @@ mainDiscordId = 328300333010911242
 sixMonthDiscordId = 859888672467320843
 sixMonthRoleId = 940902609810767894
 logChannelId = 490766846761500683
+sixMonthLogChannelId = 859927647236128808
 roleToggleEmojiId = 451081265467359253
 
 modRoles = []
@@ -64,6 +65,14 @@ sixMonthSubs = {}
 
 async def send_log_message(content: str = None, embed: discord.Embed = None):
     logchannel = bot.get_channel(logChannelId)
+    try:
+        await logchannel.send(content=content, embed=embed)
+        return True
+    except:
+        return False
+
+async def send_six_month_log_message(content: str = None, embed: discord.Embed = None):
+    logchannel = bot.get_channel(sixMonthLogChannelId)
     try:
         await logchannel.send(content=content, embed=embed)
         return True
@@ -504,10 +513,12 @@ async def process_six_month_membership(member, role):
     if isSixMonth:
         if role not in member.roles:
             await member.add_roles(role)
+            await send_six_month_log_message('Added 6 month role to <@{}>'.format(member.id))
             logging.info('Added 6 month role to member {}'.format(member))
     else:
         if role in member.roles:
             await member.remove_roles(role)
+            await send_six_month_log_message('Removed 6 month role from <@{}>'.format(member.id))
             logging.info('Removed 6 month role from member {}'.format(member))
     return isSixMonth
 
